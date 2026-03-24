@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: admin-whatsapp-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/src/backend/.cache/puppeteer
+      - key: API_PREFIX
+        value: /api
+      - key: REDIS_ENABLED
+        value: "0"
+      - key: REDIS_URL
+        value: redis://localhost:6379
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: REFRESH_TOKEN_EXPIRES_IN
+        value: 30d
+      - key: CHUNK_SIZE
+        value: "500"
+      - key: COOLDOWN_SECONDS
+        value: "60"
+      - key: COST_PER_MESSAGE
+        value: "1"
+      - key: MAX_MESSAGES_PER_NUMBER_PER_DAY
+        value: "500"

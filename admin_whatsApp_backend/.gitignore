@@ -1,0 +1,27 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# WhatsApp session files (contain auth tokens)
+.wwebjs_auth/
+.wwebjs_cache/
+session-*/
+
+# Puppeteer Chrome binary cache
+.cache/
+
+# WhatsApp web version HTML cache
+.wwebjs_cache/
+
+# Uploaded media files
+uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
