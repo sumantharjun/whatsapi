@@ -50,6 +50,7 @@ if (process.env.DEBUG_REQUESTS === '1') {
 app.use(`${API_PREFIX}/auth`,          authRoutes);
 app.use(`${API_PREFIX}/users`,         auth, rateLimit, usersRoutes);
 app.use(`${API_PREFIX}/credits`,       auth, rateLimit, creditsRoutes);
+app.use(`${API_PREFIX}/campaigns/events`, campaignsRoutes);
 app.use(`${API_PREFIX}/campaigns`,     auth, rateLimit, campaignsRoutes);
 app.use(`${API_PREFIX}/numbers`,       auth, rateLimit, numbersRoutes);
 app.use(`${API_PREFIX}/analytics`,     auth, rateLimit, analyticsRoutes);

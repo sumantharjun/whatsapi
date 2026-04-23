@@ -35,6 +35,12 @@ router.post('/', auth, allowRoles('admin'), async (req, res) => {
       vpnPasswordEncrypted,
       status: 'active',
     });
+
+    // Auto-provision WhatsApp session immediately after adding the number.
+    // Admin can then scan the QR / enter pairing code from the Accounts panel.
+    const waClient = require('../services/whatsappClientService');
+    waClient.provisionWhatsApp(doc._id.toString(), doc.number).catch(() => {});
+
     const n = doc.toObject();
     if (n.vpnPasswordEncrypted) n.vpnPasswordEncrypted = '***';
     res.status(201).json({ number: n });

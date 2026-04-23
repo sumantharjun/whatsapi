@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -70,10 +71,12 @@ function AccountsPanel({ accounts, onAdd, onReconnect, onRemove, adding }) {
         }}>
           <div style={{ padding: '12px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontWeight: 700, fontSize: 13, color: '#1e293b' }}>WhatsApp Accounts</span>
-            <button type="button" onClick={onAdd} disabled={adding}
-              style={{ background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-              {adding ? '…' : '+ Add'}
-            </button>
+            {onAdd && (
+              <button type="button" onClick={onAdd} disabled={adding}
+                style={{ background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                {adding ? '…' : '+ Add'}
+              </button>
+            )}
           </div>
 
           <div style={{ maxHeight: 380, overflowY: 'auto' }}>
@@ -91,16 +94,18 @@ function AccountsPanel({ accounts, onAdd, onReconnect, onRemove, adding }) {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    {a.status !== 'ready' && (
+                    {onReconnect && a.status !== 'ready' && (
                       <button type="button" onClick={() => onReconnect(a.clientId)}
                         style={{ fontSize: 11, padding: '3px 8px', background: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe', borderRadius: 5, cursor: 'pointer', fontWeight: 600 }}>
                         Reconnect
                       </button>
                     )}
-                    <button type="button" onClick={() => onRemove(a.clientId)}
-                      style={{ fontSize: 11, padding: '3px 8px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', borderRadius: 5, cursor: 'pointer', fontWeight: 600 }}>
-                      Remove
-                    </button>
+                    {onRemove && (
+                      <button type="button" onClick={() => onRemove(a.clientId)}
+                        style={{ fontSize: 11, padding: '3px 8px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', borderRadius: 5, cursor: 'pointer', fontWeight: 600 }}>
+                        Remove
+                      </button>
+                    )}
                   </div>
                 </div>
                 {a.status === 'qr' && a.qr && (
@@ -180,6 +185,8 @@ function SendProgress({ job, onCancel, onDone }) {
 // ── Main composer ─────────────────────────────────────────────────────────────
 
 export default function AdminCampaignComposer({ title, breadcrumb }) {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [campaignName, setCampaignName] = useState('');
   const [numbers, setNumbers] = useState('');
   const [countryCode, setCountryCode] = useState('91');
@@ -200,20 +207,22 @@ export default function AdminCampaignComposer({ title, breadcrumb }) {
   const debouncedNumbers = useDebounced(numbers, 250);
   const stats = useMemo(() => parseNumbers(debouncedNumbers, countryCode), [debouncedNumbers, countryCode]);
 
-  // Poll accounts every 5s; pause when tab hidden
+  // Poll admin WA accounts every 5s; skip entirely for non-admin
   const fetchAccounts = useCallback(async () => {
+    if (!isAdmin) return;
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     try {
       const data = await api.whatsapp.accounts();
       setAccounts(data?.accounts || []);
     } catch { /* ignore */ }
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
+    if (!isAdmin) return;
     fetchAccounts();
     const t = setInterval(fetchAccounts, 5000);
     return () => clearInterval(t);
-  }, [fetchAccounts]);
+  }, [fetchAccounts, isAdmin]);
 
   // Poll job progress every 2s while running
   useEffect(() => {
@@ -490,13 +499,15 @@ export default function AdminCampaignComposer({ title, breadcrumb }) {
         </div>
       </div>
 
-      <AccountsPanel
-        accounts={accounts}
-        onAdd={handleAddAccount}
-        onReconnect={handleReconnect}
-        onRemove={handleRemoveAccount}
-        adding={adding}
-      />
+      {isAdmin && (
+        <AccountsPanel
+          accounts={accounts}
+          onAdd={handleAddAccount}
+          onReconnect={handleReconnect}
+          onRemove={handleRemoveAccount}
+          adding={adding}
+        />
+      )}
     </>
   );
 }

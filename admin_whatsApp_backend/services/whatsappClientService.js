@@ -159,7 +159,7 @@ async function _createClient(clientId, label, phone, restartCount = 0) {
         clients.delete(clientId);
         _restarting.delete(clientId);
 
-        if (restartCount < 10) {
+        if (restartCount < 100) {
           const delay = loggedOut ? 2000 : 10000;
           setTimeout(() => _createClient(clientId, label, phone, restartCount + 1), delay);
         } else {

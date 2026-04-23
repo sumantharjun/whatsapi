@@ -16,7 +16,7 @@ async function request(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    if (res.status === 401 && typeof window !== 'undefined') {
+    if (res.status === 401 && token && typeof window !== 'undefined') {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

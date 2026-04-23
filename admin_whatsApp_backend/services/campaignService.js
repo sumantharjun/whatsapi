@@ -1,6 +1,7 @@
 const Campaign = require('../models/Campaign');
 const Recipient = require('../models/Recipient');
 const User = require('../models/User');
+const VirtualNumber = require('../models/VirtualNumber');
 const creditService = require('./creditService');
 const whatsappQueue = require('../queues/whatsappQueue');
 const { getRedis } = require('../config/redis');
@@ -95,6 +96,13 @@ async function start(campaignId, user) {
     // to avoid double-charging for messages already sent.
     const pendingCount = await Recipient.countDocuments({ campaignId, status: 'pending' });
     if (pendingCount === 0) throw new Error('No pending recipients');
+
+    // Auto-provision any active virtual numbers that don't have a WhatsApp session yet.
+    const waClient = require('./whatsappClientService');
+    const unprovisionedNumbers = await VirtualNumber.find({ status: 'active', hasWhatsApp: false }).lean();
+    for (const vn of unprovisionedNumbers) {
+      waClient.provisionWhatsApp(vn._id.toString(), vn.number).catch(() => {});
+    }
 
     const totalCost = pendingCount * COST_PER_MESSAGE;
     await creditService.deduct(ownerId, totalCost, campaignId, { recipientCount: pendingCount });

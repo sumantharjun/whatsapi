@@ -221,15 +221,14 @@ async function processJob(job) {
     let virtualNumberId = virtualNumber?._id || null;
     const clientId = virtualNumber?.whatsappClientId || null;
 
-    // No virtual numbers ready AND no admin sessions — pause campaign
+    // No virtual numbers ready — re-queue this chunk to retry in 30 seconds.
+    // Campaign stays running; once admin connects WhatsApp the next retry will proceed.
     if (!virtualNumber && readySessions.size === 0) {
-      await autoPauseCampaign(
-        campaignId,
-        'no_wa_sessions — No WhatsApp sessions are ready. Scan QR or enter pairing code in the Accounts panel.',
-        null
+      logger.info('[Worker] No WA sessions ready — re-queuing chunk in 30s', { campaignId });
+      await whatsappQueue.add(
+        { campaignId, recipientIds, delayMin, delayMax },
+        { delay: 30000, attempts: 3, backoff: { type: 'exponential', delay: 5000 } }
       );
-      await Recipient.updateOne({ _id: rec._id }, { status: 'failed', failureReason: 'No WA sessions ready' });
-      await Campaign.updateOne({ _id: campaignId }, { $inc: { failedCount: 1 } });
       return;
     }
 

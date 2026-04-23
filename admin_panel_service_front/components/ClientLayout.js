@@ -16,7 +16,7 @@ const nav = [
   { href: '/client/campaigns', label: "My User's Campaigns", section: 'my_campaigns' },
   { href: '/client/credits', label: 'Credit History', section: 'credits' },
   { href: '/client/credits', label: 'Credit Manage', section: 'credits' },
-  { href: '/client/whatsapp-login', label: 'My WhatsApp', section: null },
+
   { href: '/client/demo-requests', label: 'Demo Requests', section: 'demo_requests' },
   { href: '/client/profile', label: 'Profile', section: null },
 ];
