@@ -90,7 +90,7 @@ export default function DPCampaignPage() {
                       {(c.status === 'running' || c.status === 'queued') && (
                         <button type="button" onClick={() => setConfirmAction({ type: 'pause', id: c._id, name: c.name })} className="client-link client-link-warn">Pause</button>
                       )}
-                      <a href={`/client/campaigns/${c._id}`} className="client-link client-link-slate">View</a>
+                      <a href={`/client/campaigns/detail?id=${c._id}`} className="client-link client-link-slate">View</a>
                     </div>
                   </td>
                 </tr>
