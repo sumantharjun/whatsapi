@@ -122,7 +122,7 @@ export default function ClientCampaigns() {
                       {(c.status === 'running' || c.status === 'queued') && (
                         <button type="button" onClick={() => setConfirmAction({ type: 'pause', id: c._id, name: c.name })} className="client-link client-link-warn">Pause</button>
                       )}
-                      <a href={`/client/campaigns/${c._id}`} className="client-link client-link-slate">{c.status === 'draft' ? 'Edit / Add recipients' : 'View'}</a>
+                      <a href={`/client/campaigns/detail?id=${c._id}`} className="client-link client-link-slate">{c.status === 'draft' ? 'Edit / Add recipients' : 'View'}</a>
                     </div>
                   </td>
                 </tr>
